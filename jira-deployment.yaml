@@ -1,0 +1,115 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: jira
+  name: jira-cloud
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: jira
+      name: jira
+    spec:
+      initContainers:
+        - name: unlock-jira
+          image: busybox
+          command: ["rm", "-f", "/var/atlassian/jira/.jira-home.lock"]
+          volumeMounts:
+            - name: "jira-data"
+              mountPath: /var/atlassian/jira
+
+      containers:
+        # Container do NGINX - https
+        - name: nginx
+          image: nginx
+          ports:
+          - containerPort: 80
+          - containerPort: 443
+
+          volumeMounts:
+            - name: jira-nginx-conf
+              mountPath: /etc/nginx/conf.d
+
+            - name: nginx-tls
+              mountPath: /etc/nginx/cert/
+
+        # Container do Proxy para banco de dados
+        - name: cloudsql-proxy
+          image: gcr.io/cloudsql-docker/gce-proxy:1.11
+          command: ["/cloud_sql_proxy",
+                    "-instances=PROJECT_NAME:REGION:INSTANCE_NAME=tcp:5432", # configured for postgresql
+                    "-credential_file=/secrets/cloudsql/credentials.json"]
+
+        # Pontos de Montagem
+          volumeMounts:
+            - name: cloudsql-instance-credentials
+              mountPath: /secrets/cloudsql
+              readOnly: true
+            - name: ssl-certs
+              mountPath: /etc/ssl/certs
+            - name: cloudsql
+              mountPath: /cloudsql
+
+        # Container da aplicação JIRA
+        - name: jira
+          image: "cptactionhank/atlassian-jira-software"
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/opt/atlassian/jira/bin/stop-jira.sh"]
+          ports:
+          - containerPort: 8080
+          - containerPort: 8081
+          - containerPort: 8082
+
+          env:
+            - name: JIRA_HOME
+              value: "/var/atlassian/jira"
+            # - name: X_PROXY_NAME
+            #   value: "JIRA_URL"
+            # - name: X_PROXY_PORT
+            #   value: "443"
+            # - name: X_PROXY_SCHEME
+            #   value: "https"
+
+          volumeMounts:
+            - name: "jira-data"
+              mountPath: /var/atlassian/jira
+
+            - name: "jira-server-xml"
+              mountPath: /opt/atlassian/jira/conf/server.xml
+              subPath: server.xml
+
+      volumes:
+        - name: "jira-data"
+          persistentVolumeClaim:
+            claimName: jira-volume-claim
+
+        - name: nginx-tls
+          secret:
+            secretName: tls-https
+
+        - name: jira-nginx-conf
+          configMap:
+            name: jira-nginx-conf
+
+        - name: jira-server-xml
+          configMap:
+            name: server-xml
+
+
+  # Chaves de Autenticação junto ao Banco
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials
+
+        # Diretório Vázio para uso no Container - logs, cache e etc
+        - name: cloudsql
+          emptyDir:
+
+        # Certificados SSL
+        - name: ssl-certs
+          hostPath:
+            path: /etc/ssl/certs
