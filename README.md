@@ -59,11 +59,11 @@ jira-cloud-7f8dcd97b9-lmhg6   3/3     Running   0          23h
 Access your Jira install using a local port forward. You don't want to get hacked right out of the gate.
 
 ```
-kubectl port-forward jira-cloud-7f8dcd97b9-lmhg6 80:80
+kubectl port-forward jira-cloud-7f8dcd97b9-lmhg6 8080:80
 ```
 ```
-Forwarding from 127.0.0.1:80 -> 80
-Forwarding from [::1]:80 -> 80
+Forwarding from 127.0.0.1:8080 -> 80
+Forwarding from [::1]:8080 -> 80
 ```
 
 Visit http://127.0.0.1:80 in your browser and complete the initial setup.
