@@ -33,9 +33,9 @@ There are data to be "customized" manually:
 ```
 gcloud compute disks create [DISK_NAME] --size [DISK_SIZE] --type ext4
 ```
-[DISK_NAME] name the new disk;
-[DISK_SIZE] Size for jira-data in Gi;
-[DISK_TYPE] pd-standard or pd-ssd.
+- **[DISK_NAME]** name the new disk;
+- **[DISK_SIZE]** Size for jira-data in Gi;
+- **[DISK_TYPE]** pd-standard or pd-ssd.
 
 2 - Run in project folder:
 
