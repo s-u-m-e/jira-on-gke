@@ -11,8 +11,8 @@ These are my notes on setting up a Jira Server on Google Cloud Platform and k8s.
 
 - Deployment for the Jira server in the latest version. To customize this, edit the DOCKERFILE in this project
 	* [Atlassian JIRA Software in a Docker container](https://hub.docker.com/r/cptactionhank/atlassian-jira-software)
-- Persistent disk (PVC/PV) for `jira-home` directory
- 	* [NFS-Server-Provisioner](https://gitlab.com/bruhsb/k8s-codes/tree/master/nfs-server-provisioner)
+- Used Persistent Disk (PD) for `jira-home` directory
+ 	* [Add Persistent Disk](https://cloud.google.com/compute/docs/disks/add-persistent-disk)
 - CloudSQL Proxy like a container sidecar
 	* [CloudSQL Proxy Docs.](https://cloud.google.com/sql/docs/postgres/sql-proxy)
 - Nginx for proxy like a container sidecar
@@ -28,7 +28,16 @@ There are data to be "customized" manually:
 
 ### Jira Deployment
 
-Run in project folder:
+1 - Create a disk with gcloud:
+
+```
+gcloud compute disks create [DISK_NAME] --size [DISK_SIZE] --type ext4
+```
+[DISK_NAME] name the new disk;
+[DISK_SIZE] Size for jira-data in Gi;
+[DISK_TYPE] pd-standard or pd-ssd.
+
+2 - Run in project folder:
 
 ```
 kubectl create ns jira-cloud && kubectl -n jira-cloud create -f ./
@@ -44,7 +53,7 @@ NAME                          READY   STATUS              RESTARTS   AGE
 jira-cloud-7f8dcd97b9-lmhg6   0/3     ContainerCreating   0          2s
 ```
 
-Once the download completes you'll be good to go:
+3 - Once the download completes you'll be good to go:
 
 ```
 $ kubectl get pods

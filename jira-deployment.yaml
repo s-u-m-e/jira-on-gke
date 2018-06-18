@@ -12,14 +12,6 @@ spec:
         app: jira
       name: jira
     spec:
-      initContainers:
-        - name: unlock-jira
-          image: busybox
-          command: ["rm", "-f", "/var/atlassian/jira/.jira-home.lock"]
-          volumeMounts:
-            - name: "jira-data"
-              mountPath: /var/atlassian/jira
-
       containers:
         # Container do NGINX - https
         - name: nginx
@@ -56,6 +48,9 @@ spec:
         - name: jira
           image: "cptactionhank/atlassian-jira-software"
           lifecycle:
+            postStart:
+              exec:
+                command: ["rm", "-f", "/var/atlassian/jira/.jira-home.lock"]
             preStop:
               exec:
                 command: ["/opt/atlassian/jira/bin/stop-jira.sh"]
@@ -84,8 +79,11 @@ spec:
 
       volumes:
         - name: "jira-data"
-          persistentVolumeClaim:
-            claimName: jira-volume-claim
+          gcePersistentDisk:
+            pdName: jira-data
+            fsType: ext4
+          # persistentVolumeClaim:
+          #   claimName: jira-volume-claim
 
         - name: nginx-tls
           secret:
