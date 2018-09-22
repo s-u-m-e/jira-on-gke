@@ -15,6 +15,10 @@ spec:
     port: 80
     protocol: TCP
     targetPort: 80
+  - name: prometheus
+    port: 2990
+    protocol: TCP
+    targetPort: 2990
   selector:
     app: jira
   type: LoadBalancer

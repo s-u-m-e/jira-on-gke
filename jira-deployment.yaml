@@ -12,41 +12,51 @@ spec:
         app: jira
       name: jira
     spec:
-      containers:
-        # Container do NGINX - https
-        - name: nginx
-          image: nginx
-          ports:
-          - containerPort: 80
-          - containerPort: 443
-
+      initContainers:
+        - name: unlock-jira1
+          image: busybox
+          command: ["chown"]
+          args: ["-R", "daemon:daemon", "/var/atlassian/jira/"]
           volumeMounts:
-            - name: jira-nginx-conf
-              mountPath: /etc/nginx/conf.d
+            - name: "jira-data"
+              mountPath: /var/atlassian/jira
 
-            - name: nginx-tls
-              mountPath: /etc/nginx/cert/
+        - name: unlock-jira2
+          image: busybox
+          command: ["chmod"]
+          args: ["-R", "775", "/var/atlassian/jira/"]
+          volumeMounts:
+            - name: "jira-data"
+              mountPath: /var/atlassian/jira
+        #
+        # - name: check-db-ready
+        #   image: postgres:9.6.5
+        #   command: ['sh', '-c',
+        #     'until pg_isready -h localhost -p 5432;
+        #     do echo waiting for database; sleep 2; done;']
 
-        # Container do Proxy para banco de dados
+      containers:
+#################### Container Banco de Dados ################
         - name: cloudsql-proxy
           image: gcr.io/cloudsql-docker/gce-proxy:1.11
           command: ["/cloud_sql_proxy",
-                    "-instances=PROJECT_NAME:REGION:INSTANCE_NAME=tcp:5432", # configured for postgresql
+                    "-instances=dynamic-nomad-186013:us-central1:bi=tcp:5432",
                     "-credential_file=/secrets/cloudsql/credentials.json"]
 
-        # Pontos de Montagem
           volumeMounts:
             - name: cloudsql-instance-credentials
               mountPath: /secrets/cloudsql
               readOnly: true
+
             - name: ssl-certs
               mountPath: /etc/ssl/certs
+
             - name: cloudsql
               mountPath: /cloudsql
 
-        # Container da aplicação JIRA
+######################## Container JIRA #######################
         - name: jira
-          image: "cptactionhank/atlassian-jira-software"
+          image: "cptactionhank/atlassian-jira-software:7.11.2"
           lifecycle:
             postStart:
               exec:
@@ -62,12 +72,16 @@ spec:
           env:
             - name: JIRA_HOME
               value: "/var/atlassian/jira"
-            # - name: X_PROXY_NAME
-            #   value: "JIRA_URL"
-            # - name: X_PROXY_PORT
-            #   value: "443"
-            # - name: X_PROXY_SCHEME
-            #   value: "https"
+            - name: X_PROXY_NAME
+              value: "jira.fidelize.com.br"
+
+          resources:
+            limits:
+              cpu: "3.5"
+              memory: 3Gi
+            requests:
+              cpu: "2.5"
+              memory: 2Gi
 
           volumeMounts:
             - name: "jira-data"
@@ -77,37 +91,53 @@ spec:
               mountPath: /opt/atlassian/jira/conf/server.xml
               subPath: server.xml
 
+            - name: "jira-config-properties"
+              mountPath: /var/atlassian/jira/jira-config.properties
+              subPath: jira-config.properties
+
+################## Container NGINX ###################
+        - name: nginx
+          image: nginx
+          ports:
+          - containerPort: 80
+          - containerPort: 443
+
+          volumeMounts:
+            - name: jira-nginx-conf
+              mountPath: /etc/nginx/conf.d
+
+            - name: nginx-tls
+              mountPath: /etc/nginx/cert/
+
+#################################################################
       volumes:
         - name: "jira-data"
-          gcePersistentDisk:
-            pdName: jira-data
-            fsType: ext4
-          # persistentVolumeClaim:
-          #   claimName: jira-volume-claim
+          persistentVolumeClaim:
+            claimName: jira-storage-claim
 
         - name: nginx-tls
           secret:
-            secretName: tls-https
+            secretName: tls-fidelize-2020
 
         - name: jira-nginx-conf
           configMap:
             name: jira-nginx-conf
 
+        - name: jira-config-properties
+          configMap:
+            name: jira-config-properties
+
         - name: jira-server-xml
           configMap:
             name: server-xml
 
-
-  # Chaves de Autenticação junto ao Banco
         - name: cloudsql-instance-credentials
           secret:
             secretName: cloudsql-instance-credentials
 
-        # Diretório Vázio para uso no Container - logs, cache e etc
         - name: cloudsql
           emptyDir:
 
-        # Certificados SSL
         - name: ssl-certs
           hostPath:
             path: /etc/ssl/certs

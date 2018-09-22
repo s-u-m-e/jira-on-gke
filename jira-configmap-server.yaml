@@ -68,7 +68,7 @@ data:
                   <Connector port="8080" maxThreads="150" minSpareThreads="25" connectionTimeout="20000" enableLookups="false"
                              maxHttpHeaderSize="8192" protocol="HTTP/1.1" useBodyEncodingForURI="true" redirectPort="8443"
                              acceptCount="100" disableUploadTimeout="true" bindOnInit="false" scheme="http"
-                             proxyName="JIRA_URL" proxyPort="80"/>
+                             proxyName="jira.fidelize.com.br" proxyPort="80"/>
                   -->
 
                   <!-- Nginx Proxy Connector -->
@@ -84,7 +84,7 @@ data:
                           redirectPort="8443"
                           acceptCount="100"
                           disableUploadTimeout="true"
-                          proxyName="JIRA_URL"
+                          proxyName="jira.fidelize.com.br"
                           proxyPort="80"/>
 
                   <!-- OPTIONAL,Nginx Proxy Connector with https -->
@@ -100,7 +100,7 @@ data:
                           redirectPort="8443"
                           acceptCount="100"
                           disableUploadTimeout="true"
-                          proxyName="JIRA_URL"
+                          proxyName="jira.fidelize.com.br"
                           proxyPort="443"
                           scheme="https"
                           secure="true"/>
