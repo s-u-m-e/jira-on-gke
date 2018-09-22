@@ -117,7 +117,7 @@ spec:
 
         - name: nginx-tls
           secret:
-            secretName: tls-fidelize-2020
+            secretName: tls-secrets
 
         - name: jira-nginx-conf
           configMap:
