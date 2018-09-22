@@ -4,15 +4,15 @@ data:
           server {
                   listen  80 default_server;
                   listen  [::]:80 default_server ipv6only=on;
-                  server_name jira.fidelize.com.br;
-                  return  301 https://jira.fidelize.com.br$request_uri;
+                  server_name JIRA_URL;
+                  return  301 https://JIRA_URL$request_uri;
           }
 
           server {
                   listen 80;
                   listen 443 ssl;
                   server_name jira2.fidelize.com.br;
-                  return 301 https://jira.fidelize.com.br$request_uri;
+                  return 301 https://JIRA_URL$request_uri;
 
                 	ssl_certificate      /etc/nginx/cert/tls.crt;
                 	ssl_certificate_key  /etc/nginx/cert/tls.key;
@@ -39,7 +39,7 @@ data:
           server {
               	  listen 443 ssl http2;
                   listen [::]:443 ssl http2;
-                	server_name jira.fidelize.com.br;     # e.g., server_name source.example.com;
+                	server_name JIRA_URL;     # e.g., server_name source.example.com;
                 	server_tokens off;     # don't show the version number, a security best practice
 
                 	ssl_certificate      /etc/nginx/cert/tls.crt;

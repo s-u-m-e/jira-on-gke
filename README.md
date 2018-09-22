@@ -23,7 +23,7 @@ These are my notes on setting up a Jira Server on Google Cloud Platform and k8s.
 There are data to be "customized" manually:
 
 - **PROJECT_NAME:REGION:INSTANCE_NAME** - jira-deployment.yaml
-- **JIRA_URL** - jira-deployment.yaml and jira-configmap-server.yaml
+- **JIRA_URL** - jira-deployment.yaml, jira-configmap-server.yaml and jira-configmap.nginx.yaml
 
 **NOTE:** I'm going to start from the premise that there is a Postgresql database instance already configured.
 
