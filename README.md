@@ -7,16 +7,17 @@ These are my notes on setting up a Jira Server on Google Cloud Platform and k8s.
 - This guide is only showing the high level steps to provision a Jira setup for GKE
 - This is production ready. I used Jira like this in production.
 
-## What makes this work
+## References
 
 - Deployment for the Jira server in the latest version. To customize this, edit the DOCKERFILE in this project
 	* [Atlassian JIRA Software in a Docker container](https://hub.docker.com/r/cptactionhank/atlassian-jira-software)
-- Used Persistent Disk (PD) for `jira-home` directory
- 	* [Add Persistent Disk](https://cloud.google.com/compute/docs/disks/add-persistent-disk)
+- Used Persistent Volume (PV) and Persistent Volume Claim (PVC) for `jira-home` directory
+ 	* [Configure a Pod to Use a PersistentVolume for Storage](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/)
 - CloudSQL Proxy like a container sidecar
 	* [CloudSQL Proxy Docs.](https://cloud.google.com/sql/docs/postgres/sql-proxy)
-- Nginx for proxy like a container sidecar
-
+- Nginx for proxy httpd like a container sidecar
+	* [NGINX Docker Container](https://hub.docker.com/_/nginx/)
+	
 ## Usage
 
 There are data to be "customized" manually:
@@ -28,16 +29,7 @@ There are data to be "customized" manually:
 
 ### Jira Deployment
 
-1 - Create a disk with gcloud:
-
-```
-gcloud compute disks create [DISK_NAME] --size [DISK_SIZE] --type ext4
-```
-- **[DISK_NAME]** name the new disk;
-- **[DISK_SIZE]** Size for jira-data in Gi;
-- **[DISK_TYPE]** pd-standard or pd-ssd.
-
-2 - Run in project folder:
+1 - Run in project folder:
 
 ```
 kubectl create ns jira-cloud && kubectl -n jira-cloud create -f ./

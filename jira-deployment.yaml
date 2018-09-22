@@ -40,7 +40,7 @@ spec:
         - name: cloudsql-proxy
           image: gcr.io/cloudsql-docker/gce-proxy:1.11
           command: ["/cloud_sql_proxy",
-                    "-instances=dynamic-nomad-186013:us-central1:bi=tcp:5432",
+                    "-instances=PROJECT_NAME:REGION:INSTANCE_NAME=tcp:5432",
                     "-credential_file=/secrets/cloudsql/credentials.json"]
 
           volumeMounts:
@@ -73,7 +73,7 @@ spec:
             - name: JIRA_HOME
               value: "/var/atlassian/jira"
             - name: X_PROXY_NAME
-              value: "jira.fidelize.com.br"
+              value: "JIRA_URL"
 
           resources:
             limits:
