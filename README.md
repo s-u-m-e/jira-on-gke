@@ -22,8 +22,20 @@ These are my notes on setting up a Jira Server on Google Cloud Platform and k8s.
 
 There are data to be "customized" manually:
 
+### Configure Instance Database - CloudSQL
+
 - **PROJECT_NAME:REGION:INSTANCE_NAME** - jira-deployment.yaml
+
+### Public URL
+
 - **JIRA_URL** - jira-deployment.yaml, jira-configmap-server.yaml and jira-configmap.nginx.yaml
+
+### HTTPS
+
+[Creating a Secret Manually](https://kubernetes.io/docs/concepts/configuration/secret/#creating-a-secret-manually)
+
+- **CRT_HASH** - tls.crt
+- **KEY_HASH** - key.crt
 
 **NOTE:** I'm going to start from the premise that there is a Postgresql database instance already configured.
 
