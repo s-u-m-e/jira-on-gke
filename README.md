@@ -24,6 +24,8 @@ There are data to be "customized" manually:
 
 ### Configure Instance Database - CloudSQL
 
+[How to Use CloudSQL Proxy](https://cloud.google.com/sql/docs/postgres/sql-proxy)
+
 - **PROJECT_NAME:REGION:INSTANCE_NAME** - jira-deployment.yaml
 
 ### Public URL
